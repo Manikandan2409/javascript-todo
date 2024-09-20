@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="loginEmail">Email ID</label>
+                    <input type="email" id="loginEmail" onblur="validateEmail()" placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                    <span class="toggle-password" onclick="togglePassword('loginPassword')">Show</span>
+                </div>
+                <!-- Correct button type -->
+                <button type="submit">Login</button>
+                <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    function validateLoginForm() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        if (email === '' || password === '') {
+            alert("Email and Password cannot be empty.");
+            return false;
+        }
+
+        return true;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (validateLoginForm()) {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Call API to log in user
+            fetch('http://localhost/tutorial/login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                   const user= data.user;
+                  const email= user['email'];
+                  const username =user['username'];
+                  localStorage.setItem('username',username);
+                  localStorage.setItem('mail',email);
+                  window.location.href='todo.html';
+                    alert('Login successful!');
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+    </script>
+</body>
+</html>

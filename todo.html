@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+   <div class="todo-container">
+    <h1>Todo List</h1>
+    <div>
+        <input type="text" class="todo-topic" id="todoTopic" placeholder="Todo Topic">
+        <textarea id="todoDescription" class="todo-description" placeholder="Todo Description"></textarea>
+        <input type="date" id="todoTime">
+        <button id="addTodoButton">Add Todo</button>
+    </div>
+
+   </div>
+   <div class="todo-table">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Description</th>
+                <th>Time</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody id="todoListBody"></tbody>
+    </table>
+
+   </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const todoListBody = document.getElementById('todoListBody');
+            const addTodoButton = document.getElementById('addTodoButton');
+
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            function renderTodoList() {
+                todoListBody.innerHTML = ''; 
+                todos.map((todo, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><label class="todo-topic">${todo.topic}</label></td>
+                        <td><label class="todo-description">${todo.description}</label></td>
+                        <td><label class="todo-time">${todo.time}</label></td>
+                        <td><button class="edit-button" onclick="editTodo(${index})"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                        <td><button class="delete-button" onclick="deleteTodo(${index})">Delete</button></td>
+                    `;
+                    todoListBody.appendChild(row);
+                });
+            }
+
+            addTodoButton.addEventListener('click', function() {
+                const todoTopic = document.getElementById('todoTopic').value;
+                const todoDescription = document.getElementById('todoDescription').value;
+                const todoTime = document.getElementById('todoTime').value;
+
+                if (todoTopic === '' || todoDescription === '' || todoTime === '') {
+                    alert('Please fill out all fields');
+                    return;
+                }
+
+                const newTodo = {
+                    topic: todoTopic,
+                    description: todoDescription,
+                    time: todoTime
+                };
+
+                todos.push(newTodo);
+                localStorage.setItem('todos', JSON.stringify(todos)); 
+                renderTodoList(); 
+
+                document.getElementById('todoTopic').value = '';
+                document.getElementById('todoDescription').value = '';
+                document.getElementById('todoTime').value = '';
+            });
+
+            window.editTodo = function(index) {
+                const row = todoListBody.children[index];
+                const topicLabel = row.querySelector('.todo-topic');
+                const descriptionLabel = row.querySelector('.todo-description');
+                const timeLabel = row.querySelector('.todo-time');
+                const editButton = row.querySelector('.edit-button');
+
+                if (editButton.textContent === 'Edit') {
+                    topicLabel.outerHTML = `<input type="text" class="todo-topic" value="${todos[index].topic}">`;
+                    descriptionLabel.outerHTML = `<textarea class="todo-description">${todos[index].description}</textarea>`;
+                    timeLabel.outerHTML = `<input type="time" class="todo-time" value="${todos[index].time}">`;
+
+                    editButton.textContent = 'Save';
+                } else {
+                    const topicInput = row.querySelector('.todo-topic');
+                    const descriptionInput = row.querySelector('.todo-description');
+                    const timeInput = row.querySelector('.todo-time');
+
+                    todos[index].topic = topicInput.value;
+                    todos[index].description = descriptionInput.value;
+                    todos[index].time = timeInput.value;
+
+                    localStorage.setItem('todos', JSON.stringify(todos)); 
+
+                    renderTodoList(); 
+                }
+            };
+
+            window.deleteTodo = function(index) {
+                todos.splice(index, 1);
+                localStorage.setItem('todos', JSON.stringify(todos)); 
+                renderTodoList(); 
+            };
+
+            renderTodoList();
+        });
+    </script>
+</body>
+</html>
